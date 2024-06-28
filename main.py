@@ -25,28 +25,54 @@ def pressed():
     else:
         success=False
     update_stats(success)
+    update_record()
+    draw_progress_bar()
 
 def update_stats(success):
-    pygame.draw.rect(screen, BROWN, (440,40,300,100))
+    pygame.draw.rect(screen, BACKGROUND_COLOR, (440,40,500,100))
     global count
+    global prob
     if success:
         count+=1
     else:
         count=0
+        prob=1
+    prob=prob*(1-count/100)
     font = pygame.font.SysFont('arial', 25)
-    text=font.render('Count: '+str(count), True, WHITE)
+    text=font.render('Level: '+str(count), True, WHITE)
     screen.blit(text, (450,50))
     text=font.render('Success rate: '+str(100-count)+'%', True, WHITE)
     screen.blit(text, (450,80))
+    text=font.render('Probability: '+str(round(prob*100, 2))+'%', True, WHITE)
+    screen.blit(text, (450,110))
 
+def draw_progress_bar():
+    global count
+    pygame.draw.rect(screen, BACKGROUND_COLOR, (50,SCREEN_HEIGHT-80, 700, 30))
+    pygame.draw.rect(screen, RED, (50,SCREEN_HEIGHT-80, count*7, 30))
+    pygame.draw.rect(screen, WHITE, (50,SCREEN_HEIGHT-80,700,30),3)
 
+def update_record():
+    with open('best_score.txt', 'r') as f:
+        max_count=f.read()
+    max_count=int(max_count)
+    if count>=max_count:
+        pygame.draw.rect(screen, BACKGROUND_COLOR, (440,140,500,100))
+        max_count=count
+        max_prob=1
+        for i in range(0, max_count):
+            max_prob=max_prob*(1-max_count/100)
 
-# def porb():
-#     if count==0:
-#         return(100)
-#     else:
-#         return()
-
+        font = pygame.font.SysFont('arial', 25)
+        text=font.render('Level: '+str(max_count), True, WHITE)
+        screen.blit(text, (450,150))
+        text=font.render('Success rate: '+str(100-max_count)+'%', True, WHITE)
+        screen.blit(text, (450,180))
+        text=font.render('Probability: '+str(round(max_prob*100, 2))+'%', True, WHITE)
+        screen.blit(text, (450,210))
+        print(max_count)
+        with open('best_score.txt', 'w') as f:
+            f.write(str(max_count))
 
 
 
@@ -55,16 +81,19 @@ if __name__=='__main__':
     pygame.init()
     clock=pygame.time.Clock()
     screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT), flags, vsync=1)
-    pygame.display.set_caption('Campo minato♥')
+    pygame.display.set_caption('The button♥')
     font = pygame.font.SysFont('arial', 20)
 
     run  = True
     button=((50,350),(50,150))
     count=0
+    prob=1
 
     draw_background()
     draw_button()
     update_stats(False)
+    update_record()
+    draw_progress_bar()
 
 
 
